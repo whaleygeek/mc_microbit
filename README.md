@@ -15,6 +15,8 @@ import mc_microbit
 mc_microbit.build()
 ```
 
+![micro:bit inside Minecraft](microbit.png)
+
 The micro:bit design was done with help from Jamie from the Harlow Raspberry Pi club.
 
 David Whale
