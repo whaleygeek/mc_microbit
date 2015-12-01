@@ -16,21 +16,30 @@ import time
 
 
 class Display():
-    XSTEP   = 4
-    YSTEP   = 5
+    XSTEP   = 5
+    YSTEP   = 4
 
     ON      = block.WOOL.id, 14
     OFF     = block.WOOL.id, 13
 
     def __init__(self, parent, xoffset, yoffset, zoffset):
+        # x is x positive (EAST)
+        # z is z negative (NORTH)
+        # y is flat
         self.x  = parent.x + xoffset
         self.y  = parent.y + yoffset
-        self.z  = parent.z + zoffset
+        self.z  = parent.z - zoffset
         self.mc = parent.mc
 
         
     def set_pixel(self, x, y, state):
-        self.mc.setBlock(self.x + (x*self.XSTEP), self.y, self.z + (y*self.YSTEP), state)
+        # x is x positive (EAST)
+        # z is z negative (NORTH)
+        # y is flat
+        self.mc.setBlock(self.x + (x*self.XSTEP),
+                         self.y,
+                         self.z + (y*self.YSTEP),
+                         state)
 
 
     def clear(self):
@@ -86,9 +95,9 @@ class Microbit():
     
     # origin = bottom left of microbit, but drawn at 90 degrees!
     # X,Y,Z mc coordinates
-    DISPLAY_X_OFFSET  = 7
+    DISPLAY_X_OFFSET  = 18
     DISPLAY_Y_OFFSET  = 0
-    DISPLAY_Z_OFFSET  = 18
+    DISPLAY_Z_OFFSET  = 23
     
     # x,y offsets onto microbit
     #DISPLAY_X_SIZE = 1
@@ -115,24 +124,34 @@ class Microbit():
 
 
     def draw(self, filename=None):
+        # Note, the micro:bit is stored in a strange rotation
+        # origin is bottom left
+        # increases in x move up
+        # increases in z move right
+        # We correct this rotation as it is read-in from the file
+        # otherwise fonts are hard to draw.
+        # Later, we might just rotate the file data.
+
+        # So, it is drawn x moving x positive (east)
+        # z moving z negative (north)
+        # y flat
         if filename == None: filename=self.FILENAME
-        f = open(filename)
-        xpos = self.x
-        ypos = self.y
-        zpos = self.z
-        mc   = self.mc
+        f  = open(filename)
+        mc = self.mc
+        x  = 0
+        z  = 0
         
         for line in f.readlines():
             line = line.strip()
             csv = line.split(',')
             for b in csv:
                 b = int(b)
-                mc.setBlock(xpos, ypos, zpos, b)
-                xpos += 1
-            xpos = self.x
-            zpos += 1
+                mc.setBlock(self.x+x, self.y, self.z+z, b)
+                z -= 1
+            z = 0
+            x += 1
         f.close()
-        
+
 
 #----- TEST HARNESS -----------------------------------------------------------
 
@@ -146,8 +165,8 @@ def build():
     pos = mc.player.getTilePos()
     microbit = Microbit(mc, pos.x, pos.y-1, pos.z)
     microbit.draw()
-    microbit.display.all_on()
-    microbit.display.set_pixel(2, 2, microbit.display.OFF)
+    microbit.display.clear()
+    microbit.display.set_pixel(0,0,microbit.display.ON)
 
 
 def test():
