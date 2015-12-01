@@ -84,13 +84,40 @@ class Display():
         self.show(i)
 
 
-    def scroll(self, msg):
-        # add a space at the end, for a clean scroll
-        # build a wide image of all the characters in the message
-        # plot from offset 0 to offset (len*5) with delay in each
-        # this requires show_image to have an offset
-        pass
+    def scroll(self, msg, delay=400):
+        # assumes a clean 5x5 font, always!
+        # convert from milliseconds to seconds
+        delay = float(delay)/1000
 
+        if len(msg) == 0: return
+        if len(msg) == 1:
+            self.show_char(msg[0])
+            return
+
+        # Add a space at beginning and end, for a clean scroll
+        msg = " " + msg + " "
+
+        # build 5 rows based on font glyphs
+        output_rows = ["","","","",""]
+        for ch in msg:
+            g = fonts.microbitFont.get(ch)
+            for row in range(5):
+                r = g[row*6:(row*6)+5] # 6 because of nl
+                output_rows[row] += r
+
+        #for r in output_rows:
+        #    print(str(r))
+        # Merge into an image string with newlines at end
+        img = ""
+        for row in range(5):
+            img += output_rows[row] + '\n'
+
+        #print("IMAGE:\n" + str(img))
+        
+        # scroll
+        for i in range(len(msg)*5):
+            self.show(img, i)
+            time.sleep(delay)
 
 class Microbit():
     FILENAME = "microbit.csv"
@@ -178,17 +205,17 @@ def build():
     microbit.display.set_pixel(0,0,microbit.display.ON)
 
 
-def test():
+def hello():
+    build()
     msg = 'Hello'
     for ch in msg:
         microbit.display.show_char(ch)
         time.sleep(1)
-    
-    
-if __name__ == "__main__":
+
+
+def test_bigimage():    
     build()
     time.sleep(5)
-    #test()
     IMG = \
       "10000000000000100000\n" \
       "01000000000001000000\n" \
@@ -200,6 +227,17 @@ if __name__ == "__main__":
     for i in range(15):
         microbit.display.show(IMG, i)
         time.sleep(1)
-    
+
+
+def test_scroll():
+    # would be nice to use no parameters and get an 'in memory model' only?
+    #microbit = Microbit(0, 1, 2, 3) # dummy parameters
+    build()
+    for i in range(5):
+        microbit.display.scroll("Hello")
+
+
+if __name__ == "__main__":
+    test_scroll()
     
 # END

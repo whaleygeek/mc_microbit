@@ -11,8 +11,9 @@ Usage
 
 ```
 python
-import mc_microbit
-mc_microbit.build()
+import mc_microbit as m
+m.build()
+m.microbit.display.scroll("Hello everyone")
 ```
 
 ![micro:bit inside Minecraft](microbit.png)
