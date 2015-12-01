@@ -54,18 +54,23 @@ class Display():
                 self.set_pixel(x, y, self.ON)
 
 
-    def show(self, image):
+    def show(self, image, offset=0):
         # image is "ppppp\n" * 5
         x = 0
         y = 0
-        for ch in image:
+        # assumes no spaces, and well formed
+        i = offset # skip to offset for first row
+        while True:
+            ch = image[i]
+            i += 1
             if ch == '\n':
                 x = 0
                 y += 1
-            elif ch == ' ':
-                pass
+                if y >= 5: return # bail early
+                # assumes well formed
+                i += offset
             else:
-                if x < 5 and y < 5:
+                if x < 5:
                     if ch == '0':
                         p = self.OFF
                     else:
@@ -80,7 +85,11 @@ class Display():
 
 
     def scroll(self, msg):
-        pass # TODO
+        # add a space at the end, for a clean scroll
+        # build a wide image of all the characters in the message
+        # plot from offset 0 to offset (len*5) with delay in each
+        # this requires show_image to have an offset
+        pass
 
 
 class Microbit():
@@ -163,7 +172,7 @@ def build():
     
     mc = minecraft.Minecraft.create()
     pos = mc.player.getTilePos()
-    microbit = Microbit(mc, pos.x, pos.y-1, pos.z)
+    microbit = Microbit(mc, pos.x, pos.y, pos.z)
     microbit.draw()
     microbit.display.clear()
     microbit.display.set_pixel(0,0,microbit.display.ON)
@@ -179,6 +188,18 @@ def test():
 if __name__ == "__main__":
     build()
     time.sleep(5)
-    test()
+    #test()
+    IMG = \
+      "10000000000000100000\n" \
+      "01000000000001000000\n" \
+      "00100000000010000000\n" \
+      "00010000000100000000\n" \
+      "00001111111000000000\n"
+
+    time.sleep(5)
+    for i in range(15):
+        microbit.display.show(IMG, i)
+        time.sleep(1)
+    
     
 # END
